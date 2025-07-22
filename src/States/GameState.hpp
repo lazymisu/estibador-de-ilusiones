@@ -11,8 +11,8 @@ public:
     GameState(Game& game): game_(game) {}
     virtual ~GameState() = default;
 
-    virtual void handleInput(sf::Event event) = 0;
-    virtual void update(sf::Time dt) = 0;
+    virtual void handleInput(sf::Event event, sf::RenderWindow& window) = 0;
+    virtual void update(sf::Time dt, sf::RenderWindow& window) = 0;
     virtual void draw(sf::RenderWindow& window) = 0;
     virtual std::string getName() const = 0;
 
