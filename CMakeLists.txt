@@ -3,7 +3,7 @@ project(EstibadorDeIlusiones LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -30,7 +30,11 @@ FetchContent_Declare(ImGui-SFML
     SYSTEM)
 FetchContent_MakeAvailable(ImGui-SFML)
 
-add_executable(main src/main.cpp src/game.cpp src/States/MenuState.cpp)
+add_executable(main 
+    src/main.cpp src/game.cpp 
+    src/States/MenuState.cpp src/States/SettingsState.cpp
+    src/GUI/Button.cpp
+)
 target_compile_features(main PRIVATE cxx_std_17)
 target_link_libraries(main PRIVATE SFML::Graphics ImGui-SFML::ImGui-SFML)
 
