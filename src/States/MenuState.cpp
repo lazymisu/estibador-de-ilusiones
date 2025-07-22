@@ -36,17 +36,20 @@ void MenuState::handleInput(sf::Event event, sf::RenderWindow& window) {
     for (int i = 0; i < menuButtons_.size(); i++) {
         menuButtons_[i]->handleInput(event, window);
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && menuButtons_[i]->isHovered) {
-            switch (i) {
-                case NEW_GAME:
-                    std::cout << "NEW_GAME" << std::endl;
-                    break;
-                case SETTINGS:
-                    game_.pushState(std::make_unique<SettingsState>(game_));
-                    break;
-                case EXIT:
-                    window.close();
-                    break;
+        if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>()) {
+            if (mouseReleased->button == sf::Mouse::Button::Left && menuButtons_[i]->isHovered)
+            {
+                switch (i) {
+                    case NEW_GAME:
+                        std::cout << "NEW_GAME" << std::endl;
+                        break;
+                    case SETTINGS:
+                        game_.pushState(std::make_unique<SettingsState>(game_));
+                        break;
+                    case EXIT:
+                        window.close();
+                        break;
+                }
             }
         }
     }
