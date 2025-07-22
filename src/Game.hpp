@@ -7,6 +7,7 @@
 #include <imgui-SFML.h>
 #include <memory>
 #include "States/MenuState.hpp"
+#include "States/SettingsState.hpp"
 #include "Utils/Definitions.hpp"
 
 class Game {
@@ -14,20 +15,21 @@ public:
     Game();
     ~Game();
     void run();
-    void closeWindow();
+    void pushState(std::unique_ptr<GameState> state);
+    void popState();
+    void changeState(std::unique_ptr<GameState> state);
 
 private:
     sf::RenderWindow window_;
     sf::Clock clock_;
     std::vector<std::unique_ptr<GameState>> states_;
+    sf::View m_gameView;
+    bool m_showStateDebugWindow = false;
 
     void initWindow();
     void handleEvents();
     void update(sf::Time dt);
     void render();
-    void pushState(std::unique_ptr<GameState> state);
-    void popState();
-    void changeState(std::unique_ptr<GameState> state);
 };
 
 #endif // !GAME_HPP

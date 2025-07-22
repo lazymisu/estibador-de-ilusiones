@@ -1,6 +1,9 @@
 #include "Game.hpp"
+#include <SFML/Window/VideoMode.hpp>
+#include <imgui.h>
+#include <iostream>
 
-Game::Game() {
+Game::Game() : m_gameView(sf::FloatRect({ 0.f, 0.f }, { BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT })) {
     initWindow();
     pushState(std::make_unique<MenuState>(*this));
 }
@@ -28,10 +31,6 @@ void Game::run() {
     }
 }
 
-void Game::closeWindow() {
-    window_.close();
-}
-
 void Game::handleEvents() {
     while (const std::optional event = window_.pollEvent()) {
         ImGui::SFML::ProcessEvent(window_, *event);
@@ -41,7 +40,7 @@ void Game::handleEvents() {
         }
 
         if (!states_.empty()) {
-            states_.back()->handleInput(*event);
+            states_.back()->handleInput(*event, window_);
         }
     }
 }
@@ -50,20 +49,44 @@ void Game::update(sf::Time dt) {
     ImGui::SFML::Update(window_, clock_.restart());
 
     ImGui::Begin("Debug Info");
-    ImGui::Text("FPS: %.0f", 1.0f / dt.asSeconds());
+    ImGui::Text("FPS: %.0f", ImGui::GetIO().Framerate);
+    ImGui::Text("Delta Time: %.4f", clock_.getElapsedTime().asSeconds());
+    ImGui::SeparatorText("Window");
+    ImGui::Text("Resolution: %ix%i", window_.getSize().x, window_.getSize().y);
+    ImGui::Text("View: %0.fx%0.f", m_gameView.getSize().x, m_gameView.getSize().y);
+    ImGui::SeparatorText("More");
 
-    if (!states_.empty()) {
-        states_.back()->update(dt);
-        ImGui::Text("State: %s", states_.back()->getName().c_str());
-    } else {
-        ImGui::Text("No active state");
+    if (ImGui::Button("Show state info")) {
+        m_showStateDebugWindow = !m_showStateDebugWindow;
     }
 
     ImGui::End();
+
+    if (m_showStateDebugWindow) {
+        ImGui::Begin("State Info", &m_showStateDebugWindow);
+
+        if (!states_.empty()) {
+            ImGui::Text("Current: %s", states_.back()->getName().c_str());
+        } else {
+            ImGui::Text("Current: No active state");
+        }
+
+        ImGui::Text("States:");
+        for (std::unique_ptr<GameState>& state : states_) {
+            ImGui::BulletText("%s", state->getName().c_str());
+        }
+
+        ImGui::End();
+    }
+
+    if (!states_.empty()) {
+        states_.back()->update(dt, window_);
+    }
 }
 
 void Game::render() {
     window_.clear();
+    window_.setView(m_gameView);
 
     if (!states_.empty()) {
         states_.back()->draw(window_);
