@@ -21,10 +21,14 @@ public:
 
 private:
     // resource holder
-    sf::Font font_;
-    sf::Texture texture_;
+    sf::Font m_mainFont;
+    sf::Texture m_buttonTexture;
+    sf::Texture m_backgroundTexture;
+    sf::Texture m_containerTexture;
 
-    Button btnBack; 
+    Button m_backButton; 
+    sf::Sprite m_backgroundSprite;
+    sf::Sprite m_containerSprite;
 };
 
 #endif // !SETTINGS_STATE_HPP
