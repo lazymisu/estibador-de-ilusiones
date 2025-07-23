@@ -20,12 +20,6 @@ public:
     std::string getName() const override;
 
 private:
-    // resource holder
-    sf::Font m_mainFont;
-    sf::Texture m_buttonTexture;
-    sf::Texture m_backgroundTexture;
-    sf::Texture m_containerTexture;
-
     Button m_backButton; 
     sf::Sprite m_backgroundSprite;
     sf::Sprite m_containerSprite;

@@ -11,10 +11,7 @@ enum MenuOptions {
 
 MenuState::MenuState(Game& game) 
     : GameState(game)
-    , backgroundTexture_(MENU_BACKGROUND_PATH)
-    , backgroundSprite_(backgroundTexture_)
-    , font_(FONT_PATH)
-    , texture_(GUI_BUTTON_PATH)
+    , backgroundSprite_(game_.g_resources.get(TextureID::MenuBG))
 {
     std::vector<std::string> options = { "Nueva Partida", "Opciones", "Salir" };
     float menuX = (BASE_WINDOW_WIDTH / 2) - (BUTTON_SIZE.x / 2);
@@ -22,9 +19,13 @@ MenuState::MenuState(Game& game)
 
     for (const std::string& text : options) {
         menuButtons_.push_back(
-            std::make_unique<Button>(menuX, menuY, text, font_, texture_)
+            Button(
+                menuX, menuY, text, 
+                game_.g_resources.get(FontID::MainFont), 
+                game_.g_resources.get(TextureID::ButtonBG)
+            )
         );
-        menuY += menuButtons_.back()->getBounds().size.y + 32;
+        menuY += menuButtons_.back().getBounds().size.y + 32;
     }
 };
 
@@ -34,10 +35,10 @@ void MenuState::handleInput(sf::Event event, sf::RenderWindow& window) {
     // std::cout << key << std::endl;
 
     for (int i = 0; i < menuButtons_.size(); i++) {
-        menuButtons_[i]->handleInput(event, window);
+        menuButtons_[i].handleInput(event, window);
 
         if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>()) {
-            if (mouseReleased->button == sf::Mouse::Button::Left && menuButtons_[i]->isHovered)
+            if (mouseReleased->button == sf::Mouse::Button::Left && menuButtons_[i].isHovered)
             {
                 switch (i) {
                     case NEW_GAME:
@@ -57,7 +58,7 @@ void MenuState::handleInput(sf::Event event, sf::RenderWindow& window) {
 
 void MenuState::update(sf::Time dt, sf::RenderWindow& window) {
     for (int i = 0; i < menuButtons_.size(); i++) {
-       menuButtons_[i]->update(dt, window);
+       menuButtons_[i].update(dt, window);
     }
 }
 
@@ -65,7 +66,7 @@ void MenuState::draw(sf::RenderWindow& window) {
     window.draw(backgroundSprite_);
 
     for (int i = 0; i < menuButtons_.size(); i++) {
-       menuButtons_[i]->draw(window);
+       menuButtons_[i].draw(window);
     }
 }
 

@@ -4,13 +4,9 @@
 
 SettingsState::SettingsState(Game& game)
     : GameState(game)
-    , m_mainFont(FONT_PATH)
-    , m_buttonTexture(GUI_BUTTON_PATH)
-    , m_backgroundTexture(MENU_BACKGROUND_PATH)
-    , m_containerTexture(BOX_CONTAINER_PATH)
-    , m_backButton(50, 50, "Atras", m_mainFont, m_buttonTexture)
-    , m_backgroundSprite(m_backgroundTexture)
-    , m_containerSprite(m_containerTexture)
+    , m_backButton(50, 50, "Atras", game_.g_resources.get(FontID::MainFont), game_.g_resources.get(TextureID::ButtonBG))
+    , m_backgroundSprite(game_.g_resources.get(TextureID::MenuBG))
+    , m_containerSprite(game_.g_resources.get(TextureID::ContainerBG))
 {
     m_backgroundSprite.setPosition({ 0, 0 });
     m_containerSprite.setOrigin(m_containerSprite.getLocalBounds().getCenter());

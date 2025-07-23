@@ -9,6 +9,7 @@
 #include "States/MenuState.hpp"
 #include "States/SettingsState.hpp"
 #include "Utils/Definitions.hpp"
+#include "Utils/ResourceHolder.hpp"
 
 class Game {
 public:
@@ -18,6 +19,8 @@ public:
     void pushState(std::unique_ptr<GameState> state);
     void popState();
     void changeState(std::unique_ptr<GameState> state);
+
+    ResourceHolder g_resources;
 
 private:
     sf::RenderWindow window_;

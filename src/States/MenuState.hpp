@@ -18,12 +18,7 @@ public:
     std::string getName() const override;
 
 private:
-    // resource holder
-    sf::Font font_;
-    sf::Texture texture_;
-
-    std::vector<std::unique_ptr<Button>> menuButtons_;
-    sf::Texture backgroundTexture_;
+    std::vector<Button> menuButtons_;
     sf::Sprite backgroundSprite_;
 };
 
