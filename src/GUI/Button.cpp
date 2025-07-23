@@ -13,7 +13,7 @@ Button::Button(float x, float y,
 
     sprBackground.setPosition(rect.getPosition());
 
-    txtTitle.setFillColor(sf::Color::Black);
+    txtTitle.setFillColor(sf::Color::White);
     txtTitle.setOrigin({
         txtTitle.getLocalBounds().position.x + txtTitle.getLocalBounds().size.x / 2,
         txtTitle.getLocalBounds().position.y + txtTitle.getLocalBounds().size.y / 2
