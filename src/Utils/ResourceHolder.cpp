@@ -1,64 +1,45 @@
 #include "ResourceHolder.hpp"
 
 ResourceHolder::ResourceHolder() {
-  std::vector<FontID> fonts = {MainFont};
-  for (FontID font : fonts) {
-    add(font);
-  }
+    m_fontPaths[FontID::MainFont] = FONT_PATH;
 
-  std::vector<TextureID> textures = {MenuBG, ButtonBG, ContainerBG};
-  for (TextureID texture : textures) {
-    add(texture);
-  }
+    m_texturePaths[TextureID::MenuBG] = MENU_BACKGROUND_PATH;
+    m_texturePaths[TextureID::ButtonBG] = GUI_BUTTON_PATH;
+    m_texturePaths[TextureID::ContainerBG] = BOX_CONTAINER_PATH;
+
+    for (const auto &pair : m_fontPaths) {
+        load(pair.first, pair.second);
+    }
+
+    for (const auto &pair : m_texturePaths) {
+        load(pair.first, pair.second);
+    }
 }
 
-ResourceHolder::~ResourceHolder() { 
-    m_fonts.clear();
-    m_textures.clear();
+const sf::Font& ResourceHolder::get(FontID id) const {
+    auto it = m_fonts.find(id);
+
+    if (it != m_fonts.end()) {
+        return it->second;
+    } else {
+        exit(EXIT_FAILURE);
+    }
 }
 
-const sf::Font &ResourceHolder::get(FontID id) const {
-  auto it = m_fonts.find(id);
+const sf::Texture& ResourceHolder::get(TextureID id) const {
+    auto it = m_textures.find(id);
 
-  if (it != m_fonts.end()) {
-    return it->second;
-  } else {
-    exit(EXIT_FAILURE);
-  }
+    if (it != m_textures.end()) {
+        return it->second;
+    } else {
+        exit(EXIT_FAILURE);
+    }
 }
 
-void ResourceHolder::add(FontID id) {
-  switch (id) {
-  case FontID::MainFont:
-    m_fonts[id] = sf::Font(FONT_PATH);
-    break;
-  default:
-    break;
-  }
+void ResourceHolder::load(FontID id, const std::string &path) {
+    m_fonts[id] = sf::Font(path);
 }
 
-const sf::Texture &ResourceHolder::get(TextureID id) const {
-  auto it = m_textures.find(id);
-
-  if (it != m_textures.end()) {
-    return it->second;
-  } else {
-    exit(EXIT_FAILURE);
-  }
-}
-
-void ResourceHolder::add(TextureID id) {
-  switch (id) {
-  case TextureID::MenuBG:
-    m_textures[id] = sf::Texture(MENU_BACKGROUND_PATH);
-    break;
-  case TextureID::ButtonBG:
-    m_textures[id] = sf::Texture(GUI_BUTTON_PATH);
-    break;
-  case TextureID::ContainerBG:
-    m_textures[id] = sf::Texture(BOX_CONTAINER_PATH);
-    break;
-  default:
-    break;
-  }
+void ResourceHolder::load(TextureID id, const std::string &path) {
+    m_textures[id] = sf::Texture(path);
 }
