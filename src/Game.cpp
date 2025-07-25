@@ -1,114 +1,121 @@
 #include "Game.hpp"
-#include <SFML/Window/VideoMode.hpp>
-#include <imgui.h>
-#include <iostream>
+#include "States/GameState.hpp"
+#include "Utils/Definitions.hpp"
 
-Game::Game() : m_gameView(sf::FloatRect({ 0.f, 0.f }, { BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT })) {
-    initWindow();
-    pushState(std::make_unique<MenuState>(*this));
+Game::Game() : context_{window_, asset_manager_} {
+  initWindow();
+  pushState(std::make_unique<MenuState>(context_));
 }
 
 Game::~Game() {
-    ImGui::SFML::Shutdown();
-    window_.close();
+  ImGui::SFML::Shutdown();
+  window_.close();
 }
 
 void Game::initWindow() {
-    window_ = sf::RenderWindow(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), GAME_TITLE);
-    window_.setFramerateLimit(FRAMERATE);
+  game_view_ = sf::View(
+      sf::FloatRect({0.f, 0.f}, {kBaseWindowWidth, kBaseWindowHeight}));
 
-    if (!ImGui::SFML::Init(window_))
-        std::exit(EXIT_FAILURE);
+  window_ = sf::RenderWindow(sf::VideoMode({kWindowWidth, kWindowHeight}),
+                             kGameTitle);
+
+  window_.setFramerateLimit(kFramerate);
+
+  if (!ImGui::SFML::Init(window_)) {
+    std::exit(EXIT_FAILURE);
+  }
 }
 
 void Game::run() {
-    while (window_.isOpen()) {
-        sf::Time dt = clock_.restart();
+  while (window_.isOpen()) {
+    sf::Time dt = clock_.restart();
 
-        handleEvents();
-        update(dt);
-        render();
-    }
+    handleEvents();
+    update(dt);
+    render();
+  }
 }
 
 void Game::handleEvents() {
-    while (const std::optional event = window_.pollEvent()) {
-        ImGui::SFML::ProcessEvent(window_, *event);
+  while (const std::optional event = window_.pollEvent()) {
+    ImGui::SFML::ProcessEvent(window_, *event);
 
-        if (event->is<sf::Event::Closed>()) {
-            window_.close();
-        }
-
-        if (!states_.empty()) {
-            states_.back()->handleInput(*event, window_);
-        }
+    if (event->is<sf::Event::Closed>()) {
+      window_.close();
     }
+
+    if (!game_states_.empty()) {
+      game_states_.back()->handleInput(*event);
+    }
+  }
 }
 
 void Game::update(sf::Time dt) {
-    ImGui::SFML::Update(window_, clock_.restart());
+  ImGui::SFML::Update(window_, clock_.restart());
 
-    ImGui::Begin("Debug Info");
-    ImGui::Text("FPS: %.0f", ImGui::GetIO().Framerate);
-    ImGui::Text("Delta Time: %.4f", clock_.getElapsedTime().asSeconds());
-    ImGui::SeparatorText("Window");
-    ImGui::Text("Resolution: %ix%i", window_.getSize().x, window_.getSize().y);
-    ImGui::Text("View: %0.fx%0.f", m_gameView.getSize().x, m_gameView.getSize().y);
-    ImGui::SeparatorText("More");
+  ImGui::Begin("Debug Info");
+  ImGui::Text("FPS: %.0f", ImGui::GetIO().Framerate);
+  ImGui::Text("Delta Time: %.4f", clock_.getElapsedTime().asSeconds());
+  ImGui::SeparatorText("Window");
+  ImGui::Text("Resolution: %ix%i", window_.getSize().x, window_.getSize().y);
+  ImGui::Text("View: %0.fx%0.f", game_view_.getSize().x,
+              game_view_.getSize().y);
+  ImGui::SeparatorText("More");
 
-    if (ImGui::Button("Show state info")) {
-        m_showStateDebugWindow = !m_showStateDebugWindow;
+  if (ImGui::Button("Show state info")) {
+    show_state_debug_window = !show_state_debug_window;
+  }
+
+  ImGui::End();
+
+  if (show_state_debug_window) {
+    ImGui::Begin("State Info", &show_state_debug_window);
+
+    if (!game_states_.empty()) {
+      ImGui::Text("Current: %s", game_states_.back()->getName().c_str());
+    } else {
+      ImGui::Text("Current: No active state");
+    }
+
+    ImGui::Text("States:");
+
+    for (std::unique_ptr<GameState> &state : game_states_) {
+      ImGui::BulletText("%s", state->getName().c_str());
     }
 
     ImGui::End();
+  }
 
-    if (m_showStateDebugWindow) {
-        ImGui::Begin("State Info", &m_showStateDebugWindow);
-
-        if (!states_.empty()) {
-            ImGui::Text("Current: %s", states_.back()->getName().c_str());
-        } else {
-            ImGui::Text("Current: No active state");
-        }
-
-        ImGui::Text("States:");
-        for (std::unique_ptr<GameState>& state : states_) {
-            ImGui::BulletText("%s", state->getName().c_str());
-        }
-
-        ImGui::End();
-    }
-
-    if (!states_.empty()) {
-        states_.back()->update(dt, window_);
-    }
+  if (!game_states_.empty()) {
+    game_states_.back()->update(dt);
+  }
 }
 
 void Game::render() {
-    window_.clear();
-    window_.setView(m_gameView);
+  window_.clear();
+  window_.setView(game_view_);
 
-    if (!states_.empty()) {
-        states_.back()->draw(window_);
-    }
+  if (!game_states_.empty()) {
+    game_states_.back()->draw(window_);
+  }
 
-    ImGui::SFML::Render(window_);
-    window_.display();
+  ImGui::SFML::Render(window_);
+  window_.display();
 }
 
 void Game::pushState(std::unique_ptr<GameState> state) {
-    if (state) {
-        states_.push_back(std::move(state));
-    }
+  if (state) {
+    game_states_.push_back(std::move(state));
+  }
 }
 
 void Game::popState() {
-    if (!states_.empty()) {
-        states_.pop_back();
-    }
+  if (!game_states_.empty()) {
+    game_states_.pop_back();
+  }
 }
 
 void Game::changeState(std::unique_ptr<GameState> state) {
-    popState();
-    pushState(std::move(state));
+  popState();
+  pushState(std::move(state));
 }

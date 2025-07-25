@@ -1,25 +1,27 @@
 #ifndef MENU_STATE_HPP
 #define MENU_STATE_HPP
 
+#include "../GUI/Button.hpp"
+#include "../Utils/Definitions.hpp"
 #include "GameState.hpp"
+#include "SettingsState.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
-#include "../Utils/Definitions.hpp"
-#include "../GUI/Button.hpp"
+#include <iostream>
 
 class MenuState : public GameState {
 public:
-    MenuState(Game& game);
-    virtual ~MenuState() = default;
+  MenuState(GameContext &context);
 
-    void handleInput(sf::Event event, sf::RenderWindow& window) override;
-    void update(sf::Time dt, sf::RenderWindow& window) override;
-    void draw(sf::RenderWindow& window) override;
-    std::string getName() const override;
+  void handleInput(sf::Event event) override;
+  void update(sf::Time dt) override;
+  void draw(sf::RenderWindow &window) override;
+
+  std::string getName() const override;
 
 private:
-    std::vector<Button> menuButtons_;
-    sf::Sprite backgroundSprite_;
+  std::vector<Button> menu_buttons_;
+  sf::Sprite background_sprite_;
 };
 
 #endif // !MENU_STATE_HPP

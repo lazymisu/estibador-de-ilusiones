@@ -1,75 +1,67 @@
 #include "MenuState.hpp"
-#include "../Game.hpp"
-#include "SettingsState.hpp"
-#include <SFML/Window/Mouse.hpp>
-#include <iostream>
-#include <memory>
 
-enum MenuOptions {
-    NEW_GAME, SETTINGS, EXIT
+// todo: refactor
+enum class MenuOptions { NEW_GAME, SETTINGS, EXIT };
+
+MenuState::MenuState(GameContext &context)
+    : GameState(context),
+      background_sprite_(context_.asset_manager.get(TextureID::MenuBG)) {
+  std::vector<std::string> options = {"Nueva Partida", "Opciones", "Salir"};
+  float menuX = (kBaseWindowWidth / 2) - (kButtonSize.x / 2);
+  float menuY = static_cast<float>(kBaseWindowHeight) / 2;
+
+  for (const std::string &text : options) {
+    menu_buttons_.push_back(
+        Button(menuX, menuY, text, context_.asset_manager.get(FontID::MainFont),
+               context_.asset_manager.get(TextureID::ButtonBG)));
+    menuY += menu_buttons_.back().getBounds().size.y + 32;
+  }
 };
 
-MenuState::MenuState(Game& game) 
-    : GameState(game)
-    , backgroundSprite_(game_.g_resources.get(TextureID::MenuBG))
-{
-    std::vector<std::string> options = { "Nueva Partida", "Opciones", "Salir" };
-    float menuX = (BASE_WINDOW_WIDTH / 2) - (BUTTON_SIZE.x / 2);
-    float menuY = static_cast<float>(BASE_WINDOW_HEIGHT) / 2;
+void MenuState::handleInput(sf::Event event) {
+  const auto &keyEvent = event.getIf<sf::Event::KeyPressed>();
+  // std::string key = sf::Keyboard::getDescription(keyEvent->scancode);
+  // std::cout << key << std::endl;
 
-    for (const std::string& text : options) {
-        menuButtons_.push_back(
-            Button(
-                menuX, menuY, text, 
-                game_.g_resources.get(FontID::MainFont), 
-                game_.g_resources.get(TextureID::ButtonBG)
-            )
-        );
-        menuY += menuButtons_.back().getBounds().size.y + 32;
-    }
-};
+  for (int i = 0; i < menu_buttons_.size(); i++) {
+    menu_buttons_[i].handleInput(event, context_.window);
 
-void MenuState::handleInput(sf::Event event, sf::RenderWindow& window) {
-    const auto& keyEvent = event.getIf<sf::Event::KeyPressed>();
-    // std::string key = sf::Keyboard::getDescription(keyEvent->scancode);
-    // std::cout << key << std::endl;
-
-    for (int i = 0; i < menuButtons_.size(); i++) {
-        menuButtons_[i].handleInput(event, window);
-
-        if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>()) {
-            if (mouseReleased->button == sf::Mouse::Button::Left && menuButtons_[i].isHovered)
-            {
-                switch (i) {
-                    case NEW_GAME:
-                        std::cout << "NEW_GAME" << std::endl;
-                        break;
-                    case SETTINGS:
-                        game_.pushState(std::make_unique<SettingsState>(game_));
-                        break;
-                    case EXIT:
-                        window.close();
-                        break;
-                }
-            }
+    if (const auto *mouseReleased =
+            event.getIf<sf::Event::MouseButtonReleased>()) {
+      if (mouseReleased->button == sf::Mouse::Button::Left &&
+          menu_buttons_[i].isHovered) {
+        switch (i) {
+        case static_cast<int>(MenuOptions::NEW_GAME):
+          std::cout << "NEW_GAME" << std::endl;
+          break;
+        case static_cast<int>(MenuOptions::SETTINGS):
+          // todo: fixear
+          // context_.pushState(std::make_unique<SettingsState>(game_));
+          break;
+        case static_cast<int>(MenuOptions::EXIT):
+          // todo: fixear
+          // window.close();
+          break;
+        default:
+          break;
         }
+      }
     }
+  }
 }
 
-void MenuState::update(sf::Time dt, sf::RenderWindow& window) {
-    for (int i = 0; i < menuButtons_.size(); i++) {
-       menuButtons_[i].update(dt, window);
-    }
+void MenuState::update(sf::Time dt) {
+  for (int i = 0; i < menu_buttons_.size(); i++) {
+    menu_buttons_[i].update(dt, context_.window);
+  }
 }
 
-void MenuState::draw(sf::RenderWindow& window) {
-    window.draw(backgroundSprite_);
+void MenuState::draw(sf::RenderWindow &window) {
+  window.draw(background_sprite_);
 
-    for (int i = 0; i < menuButtons_.size(); i++) {
-       menuButtons_[i].draw(window);
-    }
+  for (int i = 0; i < menu_buttons_.size(); i++) {
+    menu_buttons_[i].draw(window);
+  }
 }
 
-std::string MenuState::getName() const {
-    return "MenuState";
-}
+std::string MenuState::getName() const { return "MenuState"; }

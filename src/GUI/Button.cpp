@@ -1,47 +1,39 @@
 #include "Button.hpp"
 
-Button::Button(float x, float y, 
-               const std::string& text, 
-               const sf::Font& font, 
-               const sf::Texture& texture)
-    : sprBackground(texture)
-    , txtTitle(font, text, 32)
-    , rect(static_cast<sf::Vector2f>(BUTTON_SIZE))
-{
-    rect.setFillColor({ 0, 0, 0 });
-    rect.setPosition({ x, y });
+Button::Button(float x, float y, const std::string &text, const sf::Font &font,
+               const sf::Texture &texture)
+    : background_sprite_(texture), title_text_(font, text, 32),
+      rect_(static_cast<sf::Vector2f>(kButtonSize)) {
+  rect_.setFillColor({0, 0, 0});
+  rect_.setPosition({x, y});
 
-    sprBackground.setPosition(rect.getPosition());
+  background_sprite_.setPosition(rect_.getPosition());
 
-    txtTitle.setFillColor(sf::Color::White);
-    txtTitle.setOrigin({
-        txtTitle.getLocalBounds().position.x + txtTitle.getLocalBounds().size.x / 2,
-        txtTitle.getLocalBounds().position.y + txtTitle.getLocalBounds().size.y / 2
-    });
-    txtTitle.setPosition({
-        x + rect.getGlobalBounds().size.x / 2,
-        y + rect.getGlobalBounds().size.y / 2
-    });
+  title_text_.setFillColor(sf::Color::White);
+  title_text_.setOrigin({title_text_.getLocalBounds().position.x +
+                             title_text_.getLocalBounds().size.x / 2,
+                         title_text_.getLocalBounds().position.y +
+                             title_text_.getLocalBounds().size.y / 2});
+  title_text_.setPosition({x + rect_.getGlobalBounds().size.x / 2,
+                           y + rect_.getGlobalBounds().size.y / 2});
 }
 
-void Button::handleInput(sf::Event event, sf::RenderWindow& window) {
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-    isHovered = rect.getGlobalBounds().contains(mousePos);
+void Button::handleInput(sf::Event event, sf::RenderWindow &window) {
+  sf::Vector2f mousePos =
+      window.mapPixelToCoords(sf::Mouse::getPosition(window));
+  isHovered = rect_.getGlobalBounds().contains(mousePos);
 }
 
-void Button::update(sf::Time dt, sf::RenderWindow& window) {
-    if (isHovered) {
-        sprBackground.setTextureRect(BUTTON_HOVER_RECT);
-    } else {
-        sprBackground.setTextureRect(BUTTON_NORMAL_RECT);
-    }
+void Button::update(sf::Time dt, sf::RenderWindow &window) {
+  auto rect = isHovered ? kButtonHoverRect : kButtonNormalRect;
+  background_sprite_.setTextureRect(rect);
 }
 
-void Button::draw(sf::RenderWindow& window) {
-    window.draw(sprBackground);
-    window.draw(txtTitle);
+void Button::draw(sf::RenderWindow &window) {
+  window.draw(background_sprite_);
+  window.draw(title_text_);
 }
 
-sf::FloatRect Button::getBounds() const {
-    return rect.getGlobalBounds();
+const sf::FloatRect Button::getBounds() const {
+  return rect_.getGlobalBounds();
 }

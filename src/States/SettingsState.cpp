@@ -1,36 +1,35 @@
 #include "SettingsState.hpp"
-#include "GameState.hpp"
-#include "../Game.hpp"
 
-SettingsState::SettingsState(Game& game)
-    : GameState(game)
-    , m_backButton(50, 50, "Atras", game_.g_resources.get(FontID::MainFont), game_.g_resources.get(TextureID::ButtonBG))
-    , m_backgroundSprite(game_.g_resources.get(TextureID::MenuBG))
-    , m_containerSprite(game_.g_resources.get(TextureID::ContainerBG))
-{
-    m_backgroundSprite.setPosition({ 0, 0 });
-    m_containerSprite.setOrigin(m_containerSprite.getLocalBounds().getCenter());
-    m_containerSprite.setPosition(m_backgroundSprite.getGlobalBounds().getCenter());
+SettingsState::SettingsState(GameContext &context)
+    : GameState(context),
+      back_button_(50, 50, "Atras",
+                   context_.asset_manager.get(FontID::MainFont),
+                   context_.asset_manager.get(TextureID::ButtonBG)),
+      background_sprite_(context_.asset_manager.get(TextureID::MenuBG)),
+      container_sprite_(context_.asset_manager.get(TextureID::ContainerBG)) {
+  container_sprite_.setOrigin(background_sprite_.getGlobalBounds().getCenter());
+  container_sprite_.setPosition(
+      background_sprite_.getGlobalBounds().getCenter());
 }
 
-void SettingsState::handleInput(sf::Event event, sf::RenderWindow& window) {
-    m_backButton.handleInput(event, window);
+void SettingsState::handleInput(sf::Event event) {
+  back_button_.handleInput(event, context_.window);
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && m_backButton.isHovered) {
-        game_.popState();
-    }
+  if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) &&
+      back_button_.isHovered) {
+    // todo: fixear
+    // context_.popState();
+  }
 }
 
-void SettingsState::update(sf::Time dt, sf::RenderWindow& window) {
-    m_backButton.update(dt, window);
+void SettingsState::update(sf::Time dt) {
+  back_button_.update(dt, context_.window);
 }
 
-void SettingsState::draw(sf::RenderWindow& window) {
-    window.draw(m_backgroundSprite);
-    window.draw(m_containerSprite);
-    m_backButton.draw(window);
+void SettingsState::draw(sf::RenderWindow &window) {
+  window.draw(background_sprite_);
+  window.draw(container_sprite_);
+  back_button_.draw(window);
 }
 
-std::string SettingsState::getName() const {
-    return "SettingsState";
-}
+std::string SettingsState::getName() const { return "SettingsState"; }

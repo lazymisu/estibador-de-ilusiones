@@ -1,45 +1,44 @@
 #include "ResourceHolder.hpp"
 
 ResourceHolder::ResourceHolder() {
-    m_fontPaths[FontID::MainFont] = FONT_PATH;
-
-    m_texturePaths[TextureID::MenuBG] = MENU_BACKGROUND_PATH;
-    m_texturePaths[TextureID::ButtonBG] = GUI_BUTTON_PATH;
-    m_texturePaths[TextureID::ContainerBG] = BOX_CONTAINER_PATH;
-
-    for (const auto &pair : m_fontPaths) {
-        load(pair.first, pair.second);
-    }
-
-    for (const auto &pair : m_texturePaths) {
-        load(pair.first, pair.second);
-    }
-}
-
-const sf::Font& ResourceHolder::get(FontID id) const {
-    auto it = m_fonts.find(id);
-
-    if (it != m_fonts.end()) {
-        return it->second;
-    } else {
-        exit(EXIT_FAILURE);
-    }
-}
-
-const sf::Texture& ResourceHolder::get(TextureID id) const {
-    auto it = m_textures.find(id);
-
-    if (it != m_textures.end()) {
-        return it->second;
-    } else {
-        exit(EXIT_FAILURE);
-    }
-}
-
-void ResourceHolder::load(FontID id, const std::string &path) {
-    m_fonts[id] = sf::Font(path);
+  load(TextureID::MenuBG, kMenuBackgroundPath);
+  load(TextureID::ContainerBG, kContainerPath);
+  load(TextureID::ButtonBG, kButtonPath);
+  load(FontID::MainFont, kFontPath);
 }
 
 void ResourceHolder::load(TextureID id, const std::string &path) {
-    m_textures[id] = sf::Texture(path);
+  sf::Texture texture;
+  if (!texture.loadFromFile(path)) {
+    throw std::runtime_error("Failed to load texture: " + path);
+  }
+  textures_[id] = std::move(texture);
+}
+
+const sf::Texture &ResourceHolder::get(TextureID id) const {
+  try {
+    return textures_.at(id);
+  } catch (const std::out_of_range &e) {
+    throw std::runtime_error(
+        "Texture not found: " + std::to_string(static_cast<int>(id)) +
+        ". Error: " + e.what());
+  }
+}
+
+void ResourceHolder::load(FontID id, const std::string &path) {
+  sf::Font font;
+  if (!font.openFromFile(path)) {
+    throw std::runtime_error("Failed to load font: " + path);
+  }
+  fonts_[id] = std::move(font);
+}
+
+const sf::Font &ResourceHolder::get(FontID id) const {
+  try {
+    return fonts_.at(id);
+  } catch (const std::out_of_range &e) {
+    throw std::runtime_error(
+        "Font not found: " + std::to_string(static_cast<int>(id)) +
+        ". Error: " + e.what());
+  }
 }

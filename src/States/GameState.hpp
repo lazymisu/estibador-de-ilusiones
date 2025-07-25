@@ -1,23 +1,28 @@
 #ifndef GAME_STATE_HPP
 #define GAME_STATE_HPP
 
+#include "../Utils/ResourceHolder.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
-class Game;
+struct GameContext {
+  sf::RenderWindow &window;
+  ResourceHolder &asset_manager;
+};
 
 class GameState {
 public:
-    GameState(Game& game): game_(game) {}
-    virtual ~GameState() = default;
+  GameState(GameContext &context) : context_(context) {}
+  virtual ~GameState() = default;
 
-    virtual void handleInput(sf::Event event, sf::RenderWindow& window) = 0;
-    virtual void update(sf::Time dt, sf::RenderWindow& window) = 0;
-    virtual void draw(sf::RenderWindow& window) = 0;
-    virtual std::string getName() const = 0;
+  virtual void handleInput(sf::Event event) = 0;
+  virtual void update(sf::Time dt) = 0;
+  virtual void draw(sf::RenderWindow &window) = 0;
+
+  virtual std::string getName() const = 0;
 
 protected:
-    Game& game_;
+  GameContext &context_;
 };
 
 #endif // !GAME_STATE_HPP
